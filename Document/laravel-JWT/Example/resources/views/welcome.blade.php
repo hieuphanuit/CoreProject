@@ -92,7 +92,12 @@
                     <a href="https://nova.laravel.com">Nova</a>
                     <a href="https://forge.laravel.com">Forge</a>
                     <a href="https://github.com/laravel/laravel">GitHub</a>
-                    <a href="{{route('user.login')}}">Login</a>
+                    @if(\Illuminate\Support\Facades\Auth::check())
+                        <a href="{{route('user.logout')}}">Logout</a>
+                    @else
+                        <a href="{{route('user.showLogin')}}">Login</a>
+                    @endif
+
                 </div>
             </div>
         </div>
