@@ -94,6 +94,7 @@
                     <a href="https://github.com/laravel/laravel">GitHub</a>
                     @if(\Illuminate\Support\Facades\Auth::check())
                         <a href="{{route('user.logout')}}">Logout</a>
+                        {{--<p>{{$token}}</p>--}}
                     @else
                         <a href="{{route('user.showLogin')}}">Login</a>
                     @endif

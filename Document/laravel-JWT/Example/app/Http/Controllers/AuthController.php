@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Http\Requests\RegisterFormRequest;
+use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Http\Request;
@@ -44,20 +45,28 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+
         $credentials = $request->only('email', 'password');
-        if (!Auth::guard()->attempt($credentials)) {
-            return response()->json([
-                'status' => 'error',
-                'error' => 'invalid.credentials',
-                'msg' => 'Invalid Credentials.'
-            ], Response::HTTP_BAD_REQUEST);
+
+        try {
+            // attempt to verify the credentials and create a token for the user
+            if (! $token = JWTAuth::attempt($credentials)) {
+                return response()->json(['error' => 'invalid_credentials'], 401);
+            }
+        } catch (JWTException $e) {
+            // something went wrong whilst attempting to encode the token
+            return response()->json(['error' => 'could_not_create_token'], 500);
         }
 
-        $users =  Auth::user()->id;
-
-        //return response()->json(['token' => $token], Response::HTTP_OK);
-        return view('welcome', compact('users'));
+        return response()->json(['token' => $token], Response::HTTP_OK);
+        //return view('welcome', compact('users'));
     }
+
+    public function getAuthenticatedUser()
+    {
+        return response()->json(auth()->user());
+    }
+
 
     public function user(Request $request)
     {
@@ -79,12 +88,11 @@ class AuthController extends Controller
      */
     public function logout(Request $request) {
         $this->validate($request, ['token' => 'required']);
-        dd('thanh cong');
+
         try {
             JWTAuth::invalidate($request->input('token'));
             //return response()->json('You have successfully logged out.', Response::HTTP_OK);
             $log = "thanh cong";
-            dd($log);
             return view('welcome');
         } catch (JWTException $e) {
             return response()->json('Failed to logout, please try again.', Response::HTTP_BAD_REQUEST);
